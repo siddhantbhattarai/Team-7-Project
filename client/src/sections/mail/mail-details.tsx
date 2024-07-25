@@ -5,7 +5,6 @@ import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
-import Collapse from '@mui/material/Collapse';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import ButtonBase from '@mui/material/ButtonBase';
@@ -23,7 +22,6 @@ import Markdown from 'src/components/markdown';
 import Scrollbar from 'src/components/scrollbar';
 import TextMaxLine from 'src/components/text-max-line';
 import EmptyContent from 'src/components/empty-content';
-import FileThumbnail from 'src/components/file-thumbnail';
 // types
 import { IMail, IMailLabel, IMailTemplate } from 'src/types/mail';
 import { Dispatch, SetStateAction } from 'react';
@@ -33,12 +31,11 @@ import { useDeleteMailTemplates } from 'src/api/mailTemplate';
 
 type Props = {
   mail: IMailTemplate;
-  renderLabel: (id: string) => IMailLabel;
   val: string;
   setVal: Dispatch<SetStateAction<string>>;
 };
 
-export default function MailDetails({ mail, renderLabel, val, setVal }: Props) {
+export default function MailDetails({ mail, val, setVal }: Props) {
   const showAttachments = useBoolean(true);
   const deleteMail = useDeleteMailTemplates();
   if (!mail) {

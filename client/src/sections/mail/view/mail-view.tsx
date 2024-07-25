@@ -50,12 +50,10 @@ export default function MailView() {
 
   const openCompose = useBoolean();
 
-  const { labels, labelsLoading } = useGetLabels();
-
-  const { data: emails, isLoading, isError } = useFetchMailTemplates();
+  const { data: emails, isLoading } = useFetchMailTemplates();
   const { data: email, isLoading: mailDetailLoading } = useFetchMailTemplateById(selectedMailId);
 
-  const firstMailId = emails ? emails[0].id : '';
+  const firstMailId = emails?.length ? emails[0].id : '';
 
   const handleToggleCompose = useCallback(() => {
     if (openNav.value) {
@@ -152,12 +150,7 @@ export default function MailView() {
           }}
         />
       ) : (
-        <MailDetails
-          val={mailValue}
-          setVal={setMaleValue}
-          mail={email}
-          renderLabel={(id: string) => labels.filter((label) => label.id === id)[0]}
-        />
+        <MailDetails val={mailValue} setVal={setMaleValue} mail={email} />
       )}
     </>
   );
