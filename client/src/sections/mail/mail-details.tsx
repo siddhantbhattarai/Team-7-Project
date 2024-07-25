@@ -27,6 +27,7 @@ import FileThumbnail from 'src/components/file-thumbnail';
 // types
 import { IMail, IMailLabel, IMailTemplate } from 'src/types/mail';
 import { Dispatch, SetStateAction } from 'react';
+import { useDeleteMailTemplates } from 'src/api/mailTemplate';
 
 // ----------------------------------------------------------------------
 
@@ -39,7 +40,7 @@ type Props = {
 
 export default function MailDetails({ mail, renderLabel, val, setVal }: Props) {
   const showAttachments = useBoolean(true);
-
+  const deleteMail = useDeleteMailTemplates();
   if (!mail) {
     return (
       <EmptyContent
@@ -53,6 +54,12 @@ export default function MailDetails({ mail, renderLabel, val, setVal }: Props) {
       />
     );
   }
+
+  const onDelete = () => {
+    if (mail.id) {
+      deleteMail.mutate(mail.id);
+    }
+  };
 
   const renderHead = (
     <Stack direction="row" alignItems="center" flexShrink={0} sx={{ height: 56, pl: 2, pr: 1 }}>
@@ -85,8 +92,12 @@ export default function MailDetails({ mail, renderLabel, val, setVal }: Props) {
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Trash">
-          <IconButton>
+        <Tooltip title="Delete">
+          <IconButton
+            onClick={() => {
+              onDelete();
+            }}
+          >
             <Iconify icon="solar:trash-bin-trash-bold" />
           </IconButton>
         </Tooltip>

@@ -33,6 +33,31 @@ export function useAddMailTemplate() {
   });
 }
 
+export function useDeleteMailTemplates() {
+  const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
+
+  return useMutation({
+    mutationKey: ['deleteemailtemplate'],
+    mutationFn: async (id: string) => {
+      const res = api.delete(`/email/${id}`);
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['emailtemplates'],
+        refetchType: 'active',
+      });
+      enqueueSnackbar('Email template delete Successfully!', { variant: 'success' });
+      router.push(paths.dashboard.mail);
+    },
+    onError: (error: any) => {
+      enqueueSnackbar(error.response.data.message || 'Something went wrong', { variant: 'error' });
+    },
+  });
+}
+
 export function useFetchMailTemplates() {
   return useQuery({
     queryKey: ['emailtemplates'],
