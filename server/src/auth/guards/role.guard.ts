@@ -6,6 +6,7 @@ export class RoleGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   matchRoles(roles: string[], userRole: string[]): boolean {
+    if (userRole.includes('ADMIN')) return true;
     return roles.some(role => userRole?.includes(role));
   }
 

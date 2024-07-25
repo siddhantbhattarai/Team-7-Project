@@ -119,9 +119,6 @@ export default function useCalendar() {
 
       updateEvent({
         id: event.id,
-        allDay: event.allDay,
-        start: fTimestamp(event.start),
-        end: fTimestamp(event.end),
       });
     },
     []
@@ -133,9 +130,6 @@ export default function useCalendar() {
 
       updateEvent({
         id: event.id,
-        allDay: event.allDay,
-        start: fTimestamp(event.start),
-        end: fTimestamp(event.end),
       });
     },
     []

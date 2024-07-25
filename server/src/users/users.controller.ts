@@ -16,7 +16,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { RoleGuard } from 'src/auth/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
-import { PaginateQueryDto } from './dto/userQuery.dto';
+import { PaginateQueryDto, StudentQueryDto } from './dto/userQuery.dto';
 
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RoleGuard)
@@ -35,6 +35,32 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
+  }
+
+  @Roles('STAFF')
+  @Get('student/details')
+  @ApiOperation({ summary: 'List all user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The found record',
+    type: [CreateUserDto],
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  findAllUnique() {
+    return this.usersService.getUniqueFields();
+  }
+
+  @Roles('STAFF')
+  @Get('count')
+  @ApiOperation({ summary: 'List all user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The found record',
+    type: [CreateUserDto],
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  findAllStudents(@Query() query: StudentQueryDto) {
+    return this.usersService.getUserCountByFilters(query);
   }
 
   @Public()

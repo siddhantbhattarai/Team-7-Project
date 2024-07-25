@@ -1,7 +1,7 @@
 import api from 'src/utils/axios';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'src/components/snackbar';
-import { IUserItem } from 'src/types/user';
+import { IUserItem, IUserUniqueFields } from 'src/types/user';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -21,6 +21,15 @@ export const useFetchUsers = (
         `/users?page=${pageNumber}&perPage=${rowsPerPage}&search=${name}&role=${role}`
       );
       return data;
+    },
+  });
+
+export const useFetchUsersUniqueRecords = () =>
+  useQuery({
+    queryKey: ['users-unique-records'],
+    queryFn: async () => {
+      const { data } = await api.get<IUserUniqueFields>(`/users/student/details`);
+      return data as IUserUniqueFields;
     },
   });
 

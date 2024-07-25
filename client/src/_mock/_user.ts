@@ -32,6 +32,15 @@ export const USER_GENDER_OPTIONS = [
   { value: 'other', label: 'Other' },
 ];
 
+export const USER_COURSE_OPTIONS = [
+  { value: 'B.Tech', label: 'B.Tech' },
+  { value: 'M.Tech', label: 'M.Tech' },
+  { value: 'MBA', label: 'MBA' },
+  { value: 'BBA', label: 'BBA' },
+  { value: 'BCA', label: 'BCA' },
+  { value: 'MCA', label: 'MCA' },
+];
+
 export const _userAbout = {
   id: _mock.id(1),
   role: _mock.role(1),

@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
-import { IsString, IsArray, IsEmail, IsOptional, IsDate, IsBoolean } from 'class-validator';
+import { IsString, IsArray, IsEmail, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreateUserDto {
   @IsEmail()
@@ -24,6 +24,30 @@ export class CreateUserDto {
     example: 'John Doe',
   })
   name: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'Course of user',
+    example: 'Bsc.CSIT',
+  })
+  batch: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'Course of user',
+    example: 'Bsc.CSIT',
+  })
+  section: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'Course of user',
+    example: 'Bsc.CSIT',
+  })
+  course: string;
 
   @IsString()
   @IsOptional()
@@ -55,6 +79,14 @@ export class CreateUserDto {
     example: '9811111111',
   })
   phoneNumber: string;
+
+  @IsArray()
+  @IsOptional()
+  @ApiProperty({
+    description: 'Array of tags associated with the user',
+    example: '["BATCH-2020"]',
+  })
+  tags: string[];
 
   @IsArray()
   @IsOptional()

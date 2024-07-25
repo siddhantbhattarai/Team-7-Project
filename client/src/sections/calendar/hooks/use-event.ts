@@ -14,20 +14,21 @@ export default function useEvent(
   openForm: boolean
 ) {
   const currentEvent = events.find((event) => event.id === selectEventId);
+  console.log('🚀 ~ current event inside useEvent:', currentEvent);
 
-  const defaultValues: ICalendarEvent = useMemo(
-    () => ({
-      id: '',
-      title: '',
-      description: '',
-      type: 'EMAIL',
-      color: CALENDAR_COLOR_OPTIONS[1],
-      allDay: false,
-      start: selectedRange ? selectedRange.start : new Date().getTime(),
-      end: selectedRange ? selectedRange.end : new Date().getTime(),
-    }),
-    [selectedRange]
-  );
+  const defaultValues = {
+    id: currentEvent?.id || '',
+    title: currentEvent?.title || null,
+    description: currentEvent?.description || null,
+    type: currentEvent?.to !== null ? 'EMAIL' : 'MULTIPLE-EMAIL',
+    color: currentEvent?.color || CALENDAR_COLOR_OPTIONS[0],
+    template: currentEvent?.emailTemplate?.title || '',
+    to: currentEvent?.to || null,
+    courses: currentEvent?.condition?.course || [],
+    sections: currentEvent?.condition?.sections || [],
+    tags: currentEvent?.condition?.tags || [],
+    batches: currentEvent?.condition?.batches || [],
+  };
 
   if (!openForm) {
     return undefined;

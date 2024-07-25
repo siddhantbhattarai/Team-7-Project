@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { PaginateQueryDto } from './dto/userQuery.dto';
+import { PaginateQueryDto, StudentQueryDto } from './dto/userQuery.dto';
 import { paginate } from 'src/utils/paginate';
 
 @Injectable()
@@ -30,6 +30,103 @@ export class UsersService {
         ...createUserDto,
       },
     });
+  }
+
+  async getUsersByFilters(query: StudentQueryDto) {
+    try {
+      const users = await this.prisma.user.findMany({
+        where: {
+          AND: [this.queryBuilder(query)],
+        },
+      });
+
+      return users;
+    } catch (error) {
+      this._logger.error(error.message);
+      throw new InternalServerErrorException(error?.message || 'Internal Server Error');
+    }
+  }
+
+  private queryBuilder(query: StudentQueryDto) {
+    const filter: any = {};
+    const { batch, section, course, tags } = query;
+    if (batch) {
+      filter.batch = { in: batch.filter(item => item !== '') };
+    }
+    if (section) {
+      filter.section = { in: section.filter(item => item !== '') };
+    }
+    if (course) {
+      filter.course = course;
+    }
+    if (tags) {
+      filter.tags = { hasSome: tags.filter(item => item !== '') };
+    }
+
+    return filter;
+  }
+
+  async getUserCountByFilters(query: StudentQueryDto) {
+    try {
+      this._logger.log(`Fetching user count by filters`);
+
+      const count = await this.prisma.user.count({
+        where: {
+          AND: [this.queryBuilder(query)],
+        },
+      });
+
+      return { count };
+    } catch (error) {
+      this._logger.error(error.message);
+      throw new InternalServerErrorException(error?.message || 'Internal Server Error');
+    }
+  }
+
+  async getUniqueFields() {
+    this._logger.log('Fetching all students');
+    try {
+      const uniqueBatches = await this.prisma.user.findMany({
+        select: {
+          batch: true,
+        },
+        distinct: ['batch'],
+      });
+
+      const uniqueSections = await this.prisma.user.findMany({
+        select: {
+          section: true,
+        },
+        distinct: ['section'],
+      });
+
+      const uniqueCourses = await this.prisma.user.findMany({
+        select: {
+          course: true,
+        },
+        distinct: ['course'],
+      });
+
+      const uniqueTagsResult = await this.prisma.user.findMany({
+        select: {
+          tags: true,
+        },
+      });
+
+      const uniqueTags = Array.from(new Set(uniqueTagsResult.flatMap(user => user.tags)));
+
+      return {
+        batch: uniqueBatches.map(user => user.batch).filter(batch => batch !== null),
+        section: uniqueSections.map(user => user.section).filter(section => section !== null),
+        course: uniqueCourses.map(user => user.course).filter(course => course !== null),
+        tags: uniqueTags,
+      };
+
+      // return students;
+    } catch (error) {
+      this._logger.error(error.message);
+      throw new InternalServerErrorException(error?.message || 'Internal Server Error');
+    }
   }
 
   async findAll(query: PaginateQueryDto) {

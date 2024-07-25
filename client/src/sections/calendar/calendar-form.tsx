@@ -15,38 +15,63 @@ import DialogActions from '@mui/material/DialogActions';
 import uuidv4 from 'src/utils/uuidv4';
 import { fTimestamp } from 'src/utils/format-time';
 // api
-import { createEvent, updateEvent, deleteEvent } from 'src/api/calendar';
+import {
+  deleteEvent,
+  useAddEventCalendar,
+  useDeleteEventCalendar,
+  useUpdateEventCalendar,
+} from 'src/api/calendar';
 // components
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import { ColorPicker } from 'src/components/color-utils';
-import FormProvider, { RHFTextField, RHFSwitch, RHFSelect } from 'src/components/hook-form';
+import FormProvider, {
+  RHFTextField,
+  RHFSwitch,
+  RHFSelect,
+  RHFAutocomplete,
+} from 'src/components/hook-form';
 // types
 import { ICalendarEvent, ICalendarDate } from 'src/types/calendar';
 import { USER_GENDER_OPTIONS } from 'src/_mock/_user';
-import { MenuItem } from '@mui/material';
+import { Chip, MenuItem } from '@mui/material';
 import { CALENDAR_EVENT_OPTIONS } from 'src/_mock';
+import { IMailTemplate } from 'src/types/mail';
+import { IUserUniqueFields } from 'src/types/user';
+import { formatDistanceToNowStrict } from 'date-fns';
+import { getCurrentUser } from 'src/utils/SessionManager';
 
 // ----------------------------------------------------------------------
 
 type Props = {
   colorOptions: string[];
   onClose: VoidFunction;
-  currentEvent?: ICalendarEvent;
+  templates: IMailTemplate[];
+  userOptions: IUserUniqueFields;
+  currentEvent?: any;
 };
 
-export default function CalendarForm({ currentEvent, colorOptions, onClose }: Props) {
-  const { enqueueSnackbar } = useSnackbar();
+export default function CalendarForm({
+  currentEvent,
+  templates,
+  userOptions,
+  colorOptions,
+  onClose,
+}: Props) {
+  console.log('currentEvent is', currentEvent);
 
   const EventSchema = Yup.object().shape({
     title: Yup.string().max(255).required('Title is required'),
     description: Yup.string().max(5000, 'Description must be at most 5000 characters'),
-    // not required
     type: Yup.string(),
     color: Yup.string(),
-    allDay: Yup.boolean(),
-    start: Yup.mixed(),
-    end: Yup.mixed(),
+    date: Yup.string(), // any string or number
+    template: Yup.object(),
+    to: Yup.string().nullable(),
+    courses: Yup.string(),
+    sections: Yup.array().of(Yup.string()),
+    tags: Yup.array().of(Yup.string()),
+    batches: Yup.array().of(Yup.string()),
   });
 
   const methods = useForm({
@@ -62,57 +87,177 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }: Pr
     formState: { isSubmitting },
   } = methods;
 
+  const addEvent = useAddEventCalendar(onClose, reset);
+  const deleteEvent = useDeleteEventCalendar(onClose, reset);
+  const updateEvent = useUpdateEventCalendar(onClose, reset);
   const values = watch();
+  const user = getCurrentUser();
 
-  const dateError = values.start && values.end ? values.start > values.end : false;
+  // const dateError = values.date ? values.date > new Date().toString() : false;
 
   const onSubmit = handleSubmit(async (data) => {
-    const eventData: ICalendarEvent = {
-      id: currentEvent?.id ? currentEvent?.id : uuidv4(),
+    console.log('data is', data);
+    const eventData = {
+      title: data.title,
+      description: data.description,
+      time: data.date,
+      templateId: data.template.value,
+      createdBy: user.id,
       color: data?.color,
-      title: data?.title,
-      type: data?.type || CALENDAR_EVENT_OPTIONS[0].value,
-      allDay: data?.allDay,
-      description: data?.description,
-      end: data?.end,
-      start: data?.start,
-    } as ICalendarEvent;
+      ...(data.type === 'EMAIL' && {
+        to: data?.to || null,
+        condition: {},
+      }),
+      ...(data.type === 'MULTIPLE-EMAIL' && {
+        to: null,
+        condition: {
+          batches: data?.batches || [],
+          sections: data?.sections || [],
+          course: data.courses || null,
+          tags: data?.tags || [],
+        },
+      }),
+    };
 
-    try {
-      if (!dateError) {
-        if (currentEvent?.id) {
-          await updateEvent(eventData);
-          enqueueSnackbar('Update success!');
-        } else {
-          await createEvent(eventData);
-          enqueueSnackbar('Create success!');
-        }
-        onClose();
-        reset();
-      }
-    } catch (error) {
-      console.error(error);
+    if (currentEvent?.id) {
+      updateEvent.mutate({ ...eventData, id: currentEvent.id });
+    } else {
+      addEvent.mutate(eventData);
     }
   });
 
-  const onDelete = useCallback(async () => {
-    try {
-      await deleteEvent(`${currentEvent?.id}`);
-      enqueueSnackbar('Delete success!');
-      onClose();
-    } catch (error) {
-      console.error(error);
+  const onDelete = () => {
+    if (currentEvent?.id) {
+      deleteEvent.mutate(currentEvent?.id);
+      return;
     }
-  }, [currentEvent?.id, enqueueSnackbar, onClose]);
+    console.log('No event to delete');
+  };
+
+  const renderBulkOptions = (
+    <>
+      <RHFAutocomplete
+        name="courses"
+        label="Course"
+        options={userOptions.course}
+        getOptionLabel={(option) => option}
+        isOptionEqualToValue={(option, value) => option === value}
+        renderOption={(props, option) => {
+          return (
+            <li {...props} key={option}>
+              <Iconify key={option} icon={`email`} width={28} sx={{ mr: 1 }} />
+              {option}
+            </li>
+          );
+        }}
+      />
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 1.5,
+          justifyContent: 'space-between',
+        }}
+      >
+        <RHFAutocomplete
+          sx={{
+            flex: '1 1 30%', // adjust flex-basis for responsiveness
+            minWidth: '200px', // minimum width for each dropdown
+          }}
+          name="sections"
+          placeholder="+ Sections"
+          multiple
+          disableCloseOnSelect
+          options={userOptions.section}
+          getOptionLabel={(option) => option}
+          renderOption={(props, option) => (
+            <li {...props} key={option}>
+              {option}
+            </li>
+          )}
+          renderTags={(selected, getTagProps) =>
+            selected.map((option, index) => (
+              <Chip
+                {...getTagProps({ index })}
+                key={option}
+                label={option}
+                size="small"
+                color="info"
+                variant="soft"
+              />
+            ))
+          }
+        />
+        <RHFAutocomplete
+          sx={{
+            flex: '1 1 30%',
+            minWidth: '200px',
+          }}
+          name="batches"
+          placeholder="+ Batches"
+          multiple
+          disableCloseOnSelect
+          options={userOptions.batch}
+          getOptionLabel={(option) => option}
+          renderOption={(props, option) => (
+            <li {...props} key={option}>
+              {option}
+            </li>
+          )}
+          renderTags={(selected, getTagProps) =>
+            selected.map((option, index) => (
+              <Chip
+                {...getTagProps({ index })}
+                key={option}
+                label={option}
+                size="small"
+                color="info"
+                variant="soft"
+              />
+            ))
+          }
+        />
+        <RHFAutocomplete
+          sx={{
+            flex: '1 1 30%',
+            minWidth: '200px',
+          }}
+          name="tags"
+          placeholder="+ Tags"
+          multiple
+          disableCloseOnSelect
+          options={userOptions.tags}
+          getOptionLabel={(option) => option}
+          renderOption={(props, option) => (
+            <li {...props} key={option}>
+              {option}
+            </li>
+          )}
+          renderTags={(selected, getTagProps) =>
+            selected.map((option, index) => (
+              <Chip
+                {...getTagProps({ index })}
+                key={option}
+                label={option}
+                size="small"
+                color="info"
+                variant="soft"
+              />
+            ))
+          }
+        />
+      </Box>
+    </>
+  );
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Stack spacing={3} sx={{ px: 3 }}>
-        <RHFTextField name="title" label="Title" />
-
-        <RHFTextField name="description" label="Description" multiline rows={3} />
-
-        <RHFSelect name="type" label="Event Type">
+        <RHFSelect
+          defaultValue={CALENDAR_EVENT_OPTIONS.map((item) => item.value === values.type)}
+          name="type"
+          label="Event Type"
+        >
           {CALENDAR_EVENT_OPTIONS.map((status) => (
             <MenuItem key={status.value} value={status.value}>
               {status.label}
@@ -120,50 +265,73 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }: Pr
           ))}
         </RHFSelect>
 
-        <RHFSwitch name="allDay" label="All day" />
+        <RHFTextField name="title" label="Title" />
 
-        <Controller
-          name="start"
-          control={control}
-          render={({ field }) => (
-            <MobileDateTimePicker
-              {...field}
-              value={new Date(field.value as ICalendarDate)}
-              onChange={(newValue) => {
-                if (newValue) {
-                  field.onChange(fTimestamp(newValue));
-                }
-              }}
-              label="Start date"
-              format="dd/MM/yyyy hh:mm a"
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                },
-              }}
-            />
-          )}
+        <RHFTextField name="description" label="Description" multiline rows={3} />
+
+        {values.type === 'EMAIL' && (
+          <RHFTextField name="to" label="To" placeholder="example@gmail.com" />
+        )}
+
+        {values.type === 'MULTIPLE-EMAIL' && renderBulkOptions}
+
+        <RHFAutocomplete
+          name="template"
+          label="Email templates"
+          options={templates.map((template) => {
+            const time = formatDistanceToNowStrict(new Date(template.updatedAt), {
+              addSuffix: false,
+            });
+            return {
+              value: template.id,
+              time,
+              by: template.createdBy.name,
+              label: template.subject,
+            };
+          })}
+          // getOptionLabel={(option) => option.label}
+          isOptionEqualToValue={(option, value) => option.value === value.value}
+          renderOption={(props, option) => {
+            return (
+              <li
+                {...props}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+                key={option.value}
+              >
+                {option.label}
+                <span
+                  style={{
+                    fontSize: '12px',
+                    color: 'gray',
+                  }}
+                >
+                  {option.by} - {option.time} ago
+                </span>
+              </li>
+            );
+          }}
         />
-
         <Controller
-          name="end"
+          name="date"
           control={control}
           render={({ field }) => (
             <MobileDateTimePicker
               {...field}
-              value={new Date(field.value as ICalendarDate)}
+              value={new Date(field.value)}
               onChange={(newValue) => {
                 if (newValue) {
-                  field.onChange(fTimestamp(newValue));
+                  field.onChange(newValue.toISOString());
                 }
               }}
-              label="End date"
+              label="Date"
               format="dd/MM/yyyy hh:mm a"
               slotProps={{
                 textField: {
                   fullWidth: true,
-                  error: dateError,
-                  helperText: dateError && 'End date must be later than start date',
                 },
               }}
             />
@@ -198,12 +366,7 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }: Pr
           Cancel
         </Button>
 
-        <LoadingButton
-          type="submit"
-          variant="contained"
-          loading={isSubmitting}
-          disabled={dateError}
-        >
+        <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
           Save Changes
         </LoadingButton>
       </DialogActions>

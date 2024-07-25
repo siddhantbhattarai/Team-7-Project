@@ -17,12 +17,18 @@ import { IUserItem } from 'src/types/user';
 // assets
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import api from 'src/utils/axios';
-import FormProvider, { RHFTextField, RHFUploadAvatar, RHFSelect } from 'src/components/hook-form';
+import FormProvider, {
+  RHFTextField,
+  RHFUploadAvatar,
+  RHFSelect,
+  RHFAutocomplete,
+} from 'src/components/hook-form';
 import MenuItem from '@mui/material/MenuItem';
 import { useAddUser, useUpdateUser } from 'src/api/users';
-import { USER_ROLES_OPTIONS, USER_GENDER_OPTIONS } from 'src/_mock';
+import { USER_ROLES_OPTIONS, USER_GENDER_OPTIONS, USER_COURSE_OPTIONS } from 'src/_mock';
 import { useSnackbar } from 'notistack';
 import { useBoolean } from 'src/hooks/use-boolean';
+import { Chip } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -43,7 +49,6 @@ export default function UserNewEditForm({ currentUser }: Props) {
 
   useEffect(() => {
     if (currentUser) {
-      console.log('🚀 ~ useEffect ~ currentUser:', currentUser);
       setRoles(currentUser?.roles[0]);
       setDob(new Date(currentUser?.dob));
     }
@@ -53,6 +58,10 @@ export default function UserNewEditForm({ currentUser }: Props) {
     name: Yup.string().required('Name is required'),
     email: Yup.string().email('Email must be a valid email address'),
     phoneNumber: Yup.string(),
+    section: Yup.string().required('Section is required'),
+    course: Yup.string().required('Course is required'),
+    batch: Yup.string().required('Batch is required'),
+    tags: Yup.array().required('Tags is required'),
     gender: Yup.string().required('Gender is required'),
     password: Yup.string().required('Password is required'),
     role: Yup.string(),
@@ -68,9 +77,13 @@ export default function UserNewEditForm({ currentUser }: Props) {
       phoneNumber: currentUser?.phoneNumber || '',
       gender: currentUser?.gender || '',
       role: currentUser?.roles[0] || '',
-      address: currentUser?.address || '',
+      address: currentUser?.address || roleParam || '',
       avatarUrl: currentUser?.profileImage || null,
       dob: currentUser?.dob || '',
+      section: currentUser?.section || '',
+      batch: currentUser?.batch || '',
+      course: currentUser?.course || '',
+      tags: currentUser?.tags || [],
       password: '',
     }),
     [currentUser]
@@ -128,6 +141,10 @@ export default function UserNewEditForm({ currentUser }: Props) {
         gender: data.gender,
         dob: dob?.toISOString() || null,
         password: data.password,
+        batch: data.batch || null,
+        section: data.section || null,
+        course: data.course || null,
+        tags: data.tags || [],
         roles: [roles],
       };
       if (data.email !== defaultValues.email) {
@@ -240,7 +257,44 @@ export default function UserNewEditForm({ currentUser }: Props) {
               <RHFTextField name="name" label="Full Name" />
               <RHFTextField name="email" label="Email Address" />
               <RHFTextField name="phoneNumber" label="Phone Number" />
-
+              <RHFTextField name="batch" label="Batch" />
+              <RHFTextField name="section" label="Section" />
+              <RHFSelect name="course" label="Courses">
+                {USER_COURSE_OPTIONS.map((status) => (
+                  <MenuItem key={status.value} value={status.value}>
+                    {status.label}
+                  </MenuItem>
+                ))}
+              </RHFSelect>
+              <RHFAutocomplete
+                sx={{
+                  flex: '1 1 30%', // adjust flex-basis for responsiveness
+                  minWidth: '200px', // minimum width for each dropdown
+                }}
+                name="tags"
+                placeholder="+ Tags"
+                multiple
+                disableCloseOnSelect
+                options={['abc', 'xyz']}
+                getOptionLabel={(option) => option}
+                renderOption={(props, option) => (
+                  <li {...props} key={option}>
+                    {option}
+                  </li>
+                )}
+                renderTags={(selected, getTagProps) =>
+                  selected.map((option, index) => (
+                    <Chip
+                      {...getTagProps({ index })}
+                      key={option}
+                      label={option}
+                      size="small"
+                      color="info"
+                      variant="soft"
+                    />
+                  ))
+                }
+              />
               <DatePicker
                 name="dob"
                 label="Date of Birth"

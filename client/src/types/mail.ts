@@ -25,6 +25,22 @@ export type IMailAttachment = {
   modifiedAt: Date;
 };
 
+export type IMailTemplate = {
+  id: string;
+  subject: string;
+  body: string;
+  condition: Record<string, string>;
+  createdBy: {
+    id: string;
+    name: string;
+    email: string;
+    profileImage: string | null;
+  };
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type IMail = {
   id: string;
   labelIds: string[];

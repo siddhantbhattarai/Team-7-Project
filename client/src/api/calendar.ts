@@ -1,9 +1,12 @@
 import { useMemo } from 'react';
 import useSWR, { mutate } from 'swr';
 // utils
-import { fetcher, endpoints } from 'src/utils/axios';
+import api, { fetcher, endpoints } from 'src/utils/axios';
 // types
 import { ICalendarEvent } from 'src/types/calendar';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSnackbar } from 'notistack';
+import { useRouter } from 'next/router';
 
 // ----------------------------------------------------------------------
 
@@ -14,6 +17,88 @@ const options = {
   revalidateOnFocus: false,
   revalidateOnReconnect: false,
 };
+export function useAddEventCalendar(onClose: VoidFunction, reset: any) {
+  const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
+
+  return useMutation({
+    mutationKey: ['addEventCalendar'],
+    mutationFn: async (event: any) => {
+      await api.post(`/calendar-event`, event);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['calendarEvents'],
+        refetchType: 'active',
+      });
+      enqueueSnackbar(`Event added Successfully!`, { variant: 'success' });
+      onClose();
+      reset();
+    },
+    onError: (error: any) => {
+      enqueueSnackbar(error.response.data.message || 'Something went wrong', { variant: 'error' });
+    },
+  });
+}
+
+export function useUpdateEventCalendar(onClose: VoidFunction, reset: any) {
+  const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
+
+  return useMutation({
+    mutationKey: ['updateEventCalendar'],
+    mutationFn: async (event: any) => {
+      const { id, ...data } = event;
+      await api.put(`/calendar-event/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['calendarEvents'],
+        refetchType: 'active',
+      });
+      enqueueSnackbar(`Event updated Successfully!`, { variant: 'success' });
+      onClose();
+      reset();
+    },
+    onError: (error: any) => {
+      enqueueSnackbar(error.response.data.message || 'Something went wrong', { variant: 'error' });
+    },
+  });
+}
+
+export function useDeleteEventCalendar(onClose: VoidFunction, reset: any) {
+  const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
+
+  return useMutation({
+    mutationKey: ['deleteEventCalendar'],
+    mutationFn: async (id: string) => {
+      await api.delete(`/calendar-event/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['calendarEvents'],
+        refetchType: 'active',
+      });
+      enqueueSnackbar(`Event deleted Successfully!`, { variant: 'success' });
+      onClose();
+      reset();
+    },
+    onError: (error: any) => {
+      enqueueSnackbar(error.response.data.message || 'Something went wrong', { variant: 'error' });
+    },
+  });
+}
+
+export function useFetchCalendarEvents() {
+  return useQuery({
+    queryKey: ['calendarEvents'],
+    queryFn: async () => {
+      const { data } = await api.get(`/calendar-event`);
+      return data;
+    },
+  });
+}
 
 export function useGetEvents() {
   const { data, isLoading, error, isValidating } = useSWR(URL, fetcher, options);

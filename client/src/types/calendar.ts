@@ -1,5 +1,7 @@
 // ----------------------------------------------------------------------
 
+import { IUserItem } from './user';
+
 export type ICalendarFilterValue = string[] | Date | null;
 
 export type ICalendarFilters = {
@@ -21,10 +23,17 @@ export type ICalendarRange = {
 
 export type ICalendarEvent = {
   id: string;
-  color: string;
-  title: string;
-  allDay: boolean;
   description: string;
-  end: ICalendarDate;
-  start: ICalendarDate;
+  title: string;
+  date?: string;
+  template?: string;
+  emailTemplate?: any;
+  condition?: Record<string, any>;
+  to?: string;
+  createdBy?: IUserItem;
+  status?: string;
+  type?: string;
+  color?: string;
+  createdAt: string;
+  updatedAt: string;
 };

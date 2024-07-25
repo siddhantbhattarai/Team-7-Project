@@ -138,6 +138,7 @@ export default function StudentListView({ userList, heading }: any) {
               startIcon={<Iconify icon="mingcute:add-line" />}
               color="primary"
               onClick={() => {
+                console.log();
                 router.push(
                   `${paths.dashboard.user.new}?${createQueryString('role', userList || '')}`
                 );

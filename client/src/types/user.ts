@@ -108,6 +108,13 @@ export interface Role {
   roleId: string; // Add other role types if needed
 }
 
+export type IUserUniqueFields = {
+  batch: string[];
+  section: string[];
+  course: string[];
+  tags: string[];
+};
+
 export type IUserItem = {
   id: string;
   name: string;
@@ -115,6 +122,10 @@ export type IUserItem = {
   phoneNumber: string;
   gender: string;
   address: string;
+  tags: string[];
+  section: string;
+  batch: string;
+  course: string;
   dob: string;
   profileImage: string;
   roles: string[];

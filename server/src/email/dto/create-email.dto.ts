@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsJSON } from 'class-validator';
 
 export class CreateEmailTemplateDto {
   @IsString()
@@ -24,6 +24,14 @@ export class CreateEmailTemplateDto {
     example: '2342-23424',
   })
   createdBy: string;
+
+  // TODO: Add to (email) condition
+  @ApiProperty({
+    description: 'Metadata of email template',
+    example: { key: 'value' },
+  })
+  @IsOptional()
+  condition: Record<string, any>;
 
   @IsString()
   @IsOptional()

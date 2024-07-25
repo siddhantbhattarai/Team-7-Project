@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const saltRound = 10;
@@ -14,11 +14,13 @@ enum ROLE {
   USER = 'USER',
 }
 
-export const users = [
+export const users: Prisma.UserCreateInput[] = [
   {
     name: 'Admin user',
     phoneNumber: '9801234567',
     gender: 'Male',
+    address: 'Kathmandu',
+    batch: '2020',
     dob: '2002-01-02',
     roles: [ROLE.ADMIN],
     password: 'dipesh123',
@@ -29,17 +31,22 @@ export const users = [
     phoneNumber: '9801234567',
     gender: 'Male',
     dob: '2002-01-02',
+    address: 'Kathmandu',
     roles: [ROLE.ADMIN],
+    batch: '2020',
     password: 'dipesh123',
     email: 'dipesh.mindxcape@gmail.com',
   },
   {
     name: 'Student User',
+    address: 'Kathmandu',
     phoneNumber: '9801234567',
     gender: 'Male',
     dob: '2002-01-02',
     roles: [ROLE.ADMIN],
     password: 'student123',
+    batch: '2020',
+    course: 'Bsc.CSIT',
     email: 'student@gmail.com',
   },
 ];

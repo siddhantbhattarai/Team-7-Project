@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { MailModule } from './mailer/mailer.module';
 import { UsersModule } from './users/users.module';
 import { EmailModule } from './email/email.module';
+import { CalendarEventModule } from './calendar-event/calendar-event.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { EmailModule } from './email/email.module';
     MailModule,
     UsersModule,
     EmailModule,
+    CalendarEventModule,
   ],
 })
 export class AppModule {}

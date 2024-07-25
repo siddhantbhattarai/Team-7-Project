@@ -3,8 +3,8 @@ import { palette as themePalette } from 'src/theme/palette';
 // ----------------------------------------------------------------------
 
 export const CALENDAR_EVENT_OPTIONS = [
+  { value: 'MULTIPLE-EMAIL', label: 'MULTIPLE EMAIL' },
   { value: 'EMAIL', label: 'EMAIL' },
-  { value: 'NOTIFICATION', label: 'NOTIFICATION' },
 ];
 
 const palette = themePalette('light');

@@ -1,6 +1,6 @@
 'use client';
 
-import Calendar from '@fullcalendar/react'; // => request placed at the top
+import Calendar from '@fullcalendar/react';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -25,7 +25,8 @@ import { useResponsive } from 'src/hooks/use-responsive';
 // _mock
 import { CALENDAR_COLOR_OPTIONS } from 'src/_mock/_calendar';
 // api
-import { useGetEvents, updateEvent } from 'src/api/calendar';
+import { useGetEvents, updateEvent, useFetchCalendarEvents } from 'src/api/calendar';
+import { useFetchMailTemplates } from 'src/api/mailTemplate';
 // components
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
@@ -38,6 +39,7 @@ import CalendarForm from '../calendar-form';
 import CalendarToolbar from '../calendar-toolbar';
 import CalendarFilters from '../calendar-filters';
 import CalendarFiltersResult from '../calendar-filters-result';
+import { useFetchUsersUniqueRecords } from 'src/api/users';
 
 // ----------------------------------------------------------------------
 
@@ -49,8 +51,13 @@ const defaultFilters: ICalendarFilters = {
 
 // ----------------------------------------------------------------------
 
-export default function CalendarView() {
+export default function CalendarView({ items }: { items: any[] }) {
   const theme = useTheme();
+
+  const events = items.map((event: any) => ({
+    ...event,
+    date: event.eventDateTime,
+  }));
 
   const settings = useSettingsContext();
 
@@ -58,9 +65,12 @@ export default function CalendarView() {
 
   const openFilters = useBoolean();
 
+  const { data: emailTemplates, isLoading: templateLoading } = useFetchMailTemplates();
+  const { data: uniqueRecords, isLoading: uniqueRecordsLoading } = useFetchUsersUniqueRecords();
+
   const [filters, setFilters] = useState(defaultFilters);
 
-  const { events, eventsLoading } = useGetEvents();
+  // const { events, eventsLoading } = useGetEvents();
 
   const dateError =
     filters.startDate && filters.endDate
@@ -95,6 +105,7 @@ export default function CalendarView() {
 
   const currentEvent = useEvent(events, selectEventId, selectedRange, openForm);
 
+  // for calendar
   useEffect(() => {
     onInitialView();
   }, [onInitialView]);
@@ -131,6 +142,22 @@ export default function CalendarView() {
     />
   );
 
+  function renderEventContent(eventInfo: any) {
+    return (
+      <>
+        <div
+          style={{
+            backgroundColor: eventInfo.event.backgroundColor,
+            borderRadius: '8px',
+            padding: '2px 4px',
+          }}
+        >
+          {eventInfo?.timeText} {eventInfo?.event.title}
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'xl'}>
@@ -159,7 +186,7 @@ export default function CalendarView() {
             <CalendarToolbar
               date={date}
               view={view}
-              loading={eventsLoading}
+              loading={false}
               onNextDate={onDateNext}
               onPrevDate={onDatePrev}
               onToday={onDateToday}
@@ -178,6 +205,7 @@ export default function CalendarView() {
               ref={calendarRef}
               initialDate={date}
               initialView={view}
+              eventContent={renderEventContent}
               dayMaxEventRows={3}
               eventDisplay="block"
               events={dataFiltered}
@@ -202,10 +230,9 @@ export default function CalendarView() {
           </StyledCalendar>
         </Card>
       </Container>
-
       <Dialog
         fullWidth
-        maxWidth="xs"
+        maxWidth="xl"
         open={openForm}
         onClose={onCloseForm}
         transitionDuration={{
@@ -217,13 +244,16 @@ export default function CalendarView() {
           {openForm && <> {currentEvent?.id ? 'Edit Event' : 'Add Event'}</>}
         </DialogTitle>
 
-        <CalendarForm
-          currentEvent={currentEvent}
-          colorOptions={CALENDAR_COLOR_OPTIONS}
-          onClose={onCloseForm}
-        />
+        {emailTemplates && uniqueRecords && (
+          <CalendarForm
+            templates={emailTemplates}
+            userOptions={uniqueRecords}
+            currentEvent={currentEvent}
+            colorOptions={CALENDAR_COLOR_OPTIONS}
+            onClose={onCloseForm}
+          />
+        )}
       </Dialog>
-
       <CalendarFilters
         open={openFilters.value}
         onClose={openFilters.onFalse}
@@ -256,7 +286,6 @@ function applyFilter({
   dateError: boolean;
 }) {
   const { colors, startDate, endDate } = filters;
-
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
   inputData = stabilizedThis.map((el) => el[0]);
@@ -265,15 +294,17 @@ function applyFilter({
     inputData = inputData.filter((event) => colors.includes(event.color as string));
   }
 
-  if (!dateError) {
-    if (startDate && endDate) {
-      inputData = inputData.filter(
-        (event) =>
-          fTimestamp(event.start) >= fTimestamp(startDate) &&
-          fTimestamp(event.end) <= fTimestamp(endDate)
-      );
-    }
+  if (startDate && endDate) {
+    inputData = inputData.filter(
+      (event) =>
+        fTimestamp(event.date) >= fTimestamp(startDate) &&
+        fTimestamp(event.date) <= fTimestamp(endDate)
+    );
   }
 
-  return inputData;
+  const newInput = inputData.map((el) => {
+    return { ...el, time: fTimestamp(el.date) };
+  });
+
+  return newInput;
 }
