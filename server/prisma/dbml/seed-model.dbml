@@ -77,6 +77,6 @@ Enum Role {
 
 Ref: email_templates.userId > users.id
 
-Ref: calendar_events.emailTemplateId > email_templates.id
+Ref: calendar_events.emailTemplateId > email_templates.id [delete: Cascade]
 
-Ref: calendar_events.userId > users.id
+Ref: calendar_events.userId > users.id [delete: Set Null]

@@ -86,12 +86,12 @@ model CalendarEvents {
   description     String
   eventDateTime   DateTime
   emailTemplateId String
-  emailTemplate   EmailTemplates @relation(fields: [emailTemplateId], references: [id])
+  emailTemplate   EmailTemplates @relation(fields: [emailTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   condition       Json
   color           String         @default("#000000")
   to              String?
 
-  createdBy User   @relation(fields: [userId], references: [id])
+  createdBy User   @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   userId    String
   status    String @default("PENDING")
 
