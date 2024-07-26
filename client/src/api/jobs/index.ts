@@ -81,6 +81,35 @@ export function useUpdateJob(reset: any) {
   });
 }
 
+export function useApplyJob(onClose: VoidFunction) {
+  const { enqueueSnackbar } = useSnackbar();
+
+  return useMutation({
+    mutationKey: ['applyJob'],
+    mutationFn: async ({ id, file }: { id: string; file: string }) => {
+      const formData = new FormData();
+      formData.append('files', file);
+      const res = await api.post(`/jobs/upload/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      return res.data;
+    },
+    onSuccess: () => {
+      enqueueSnackbar('Successfully applied for this job', { variant: 'success' });
+      onClose();
+    },
+    onError: (error: any) => {
+      console.log(error.response.data.message || 'Something went wrong');
+      enqueueSnackbar(error.response.data.message || 'Failed to apply for this job', {
+        variant: 'error',
+      });
+    },
+  });
+}
+
 export function useRemoveJob() {
   const queryClient = useQueryClient();
   const { enqueueSnackbar } = useSnackbar();

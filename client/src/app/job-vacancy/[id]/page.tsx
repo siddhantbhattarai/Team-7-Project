@@ -17,6 +17,7 @@ import { LoadingScreen } from 'src/components/loading-screen';
 import JobDetailsContent from 'src/sections/job/job-details-content';
 import { Box, Button, Dialog, Stack, Typography, useTheme } from '@mui/material';
 import JobApplyForm from 'src/sections/job/job-form';
+import { IJobItem } from 'src/types/job';
 
 // ----------------------------------------------------------------------
 
@@ -113,7 +114,7 @@ export default function JobDetailsView() {
 
       {currentTab === 'content' && (
         <Box>
-          <JobDetailsContent job={currentJob} />
+          <JobDetailsContent job={currentJob as unknown as IJobItem} />
           <Stack
             direction="row"
             alignItems="center"
