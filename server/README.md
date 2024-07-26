@@ -68,23 +68,3 @@ $ yarn run start:prod
 ## Testing the API EndPoints
 
 1. Visit the url shown in the terminal >>> http://localhost:3333/api/docs for more details
-
-2. Register the User
-
-![Register](./images/register.png)
-
-3. Send otp to the User
-
-![Send OTP](./images/send-otp.png)
-
-4. Login
-
-![Login](./images/login.png)
-
-5. Use the Access token from Above to access protected route
-
-![Delete User Protected Route](./images/delete-user.png)
-
-6. Refresh the token
-
-![Refresh](./images/refresh-token.png)
