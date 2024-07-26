@@ -5,3 +5,10 @@
 - client | next
 - db     | postgres
 - cache  | redis
+
+## How to run ??
+```bash
+cp .env.sample .env
+docker compose up -d
+lazydocker
+```

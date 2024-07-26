@@ -1,21 +1,26 @@
-FROM node:18-alpine As development
+FROM node:18-alpine AS base
 
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copy application dependency manifests to the container image.
 # A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
 # Copying this first prevents re-running npm install on every code change.
-COPY --chown=node:node COPY package*.json ./
+# COPY --chown=node:node package*.json .
 
-# Install app dependencies using the `npm ci || yarn install --frozen-lockfile` command instead of `npm install`
-RUN npm install
+# # Install app dependencies using the `npm ci || yarn install --frozen-lockfile` command instead of `npm install`
+# RUN npm install
 
-# Bundle app source
-COPY --chown=node:node . .
-
-# Use the node user from the image (instead of the root user)
-USER node
+#####################
+# RUN FOR DEVELOPMENT
+#####################
+FROM base as dev
+RUN --mount=type=bind,source=server/package.json,target=package.json \
+    --mount=type=bind,source=server/package-lock.json,target=package-lock.json \
+    --mount=type=cache,target=/root/.npm \
+    npm ci --include=dev
+#USER node
+CMD npm run dev
 
 ###################
 # BUILD FOR PRODUCTION
@@ -56,6 +61,8 @@ COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 
 # Expose application port
 EXPOSE 3333
+
+USER node
 
 # Start the server using the production build
 CMD [ "node", "dist/main.js" ]

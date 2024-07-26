@@ -13,3 +13,20 @@ services:
     image: redis:6.2.12
     restart: always
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy noeviction
+
+  server:
+    build:
+      context: '.'
+      dockerfile: './server/Dockerfile'
+      target: 'dev'
+    command: './bin/start-server.sh'
+    volumes:
+      - ./server:/app
+    env_file:
+      - './server/.env'
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    depends_on:
+      - db
+      - cache
+
