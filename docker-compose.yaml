@@ -30,3 +30,18 @@ services:
       - db
       - cache
 
+  client:
+    build:
+      context: '.'
+      dockerfile: './client/Dockerfile'
+      target: 'dev'
+    #command: 'sleep 20m'
+    volumes:
+      - ./client:/app
+    env_file:
+      - './client/.env'
+    ports:
+      - ${CLIENT_PORT}:${CLIENT_PORT}
+    depends_on:
+      -  server
+

@@ -1,10 +1,17 @@
 # Install dependencies only when needed
 FROM node:18-alpine3.17 AS builder
-WORKDIR /opt/app
-COPY package.json ./
-RUN yarn install 
-COPY . .
-RUN yarn build
+WORKDIR /app
+
+#####################
+# RUN FOR DEVELOPMENT
+#####################
+FROM builder as dev
+RUN --mount=type=bind,source=client/package.json,target=package.json \
+    --mount=type=bind,source=client/package-lock.json,target=package-lock.json \
+    --mount=type=cache,target=/root/.npm \
+    yarn install --include=dev
+#USER node
+CMD yarn dev
 
 FROM node:18-alpine3.17 AS devDeps
 WORKDIR /opt/app
