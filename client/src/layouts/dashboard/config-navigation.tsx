@@ -69,9 +69,7 @@ export function useNavData() {
             icon: ICONS.job,
             children: [
               { title: t('list'), path: paths.dashboard.job.root },
-              { title: t('details'), path: paths.dashboard.job.demo.details },
               { title: t('create'), path: paths.dashboard.job.new },
-              { title: t('edit'), path: paths.dashboard.job.demo.edit },
             ],
           },
 

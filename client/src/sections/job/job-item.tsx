@@ -28,9 +28,10 @@ type Props = {
   onView: VoidFunction;
   onEdit: VoidFunction;
   onDelete: VoidFunction;
+  outSide?: boolean;
 };
 
-export default function JobItem({ job, onView, onEdit, onDelete }: Props) {
+export default function JobItem({ job, onView, onEdit, onDelete, outSide = false }: Props) {
   const popover = usePopover();
 
   const { id, title, company, createdAt, candidates, experience, employmentTypes, salary, role } =
@@ -45,8 +46,8 @@ export default function JobItem({ job, onView, onEdit, onDelete }: Props) {
 
         <Stack sx={{ p: 3, pb: 2 }}>
           <Avatar
-            alt={company.name}
-            src={company.logo}
+            alt="ismt"
+            src="https://api-dev-minimal-v510.vercel.app/assets/images/company/company_1.png"
             variant="rounded"
             sx={{ width: 48, height: 48, mb: 2 }}
           />
@@ -77,7 +78,7 @@ export default function JobItem({ job, onView, onEdit, onDelete }: Props) {
             sx={{ color: 'primary.main', typography: 'caption' }}
           >
             <Iconify width={16} icon="solar:users-group-rounded-bold" />
-            {candidates.length} Candidates
+            {candidates?.length} Candidates
           </Stack>
         </Stack>
 
@@ -118,43 +119,55 @@ export default function JobItem({ job, onView, onEdit, onDelete }: Props) {
           ))}
         </Box>
       </Card>
-
       <CustomPopover
         open={popover.open}
         onClose={popover.onClose}
         arrow="right-top"
         sx={{ width: 140 }}
       >
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            onView();
-          }}
-        >
-          <Iconify icon="solar:eye-bold" />
-          View
-        </MenuItem>
+        {outSide ? (
+          <MenuItem
+            onClick={() => {
+              popover.onClose();
+              onView();
+            }}
+          >
+            <Iconify icon="solar:eye-bold" />
+            View
+          </MenuItem>
+        ) : (
+          <>
+            <MenuItem
+              onClick={() => {
+                popover.onClose();
+                onView();
+              }}
+            >
+              <Iconify icon="solar:eye-bold" />
+              View
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                popover.onClose();
+                onEdit();
+              }}
+            >
+              <Iconify icon="solar:pen-bold" />
+              Edit
+            </MenuItem>
 
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            onEdit();
-          }}
-        >
-          <Iconify icon="solar:pen-bold" />
-          Edit
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            onDelete();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
-        </MenuItem>
+            <MenuItem
+              onClick={() => {
+                popover.onClose();
+                onDelete();
+              }}
+              sx={{ color: 'error.main' }}
+            >
+              <Iconify icon="solar:trash-bin-trash-bold" />
+              Delete
+            </MenuItem>
+          </>
+        )}
       </CustomPopover>
     </>
   );

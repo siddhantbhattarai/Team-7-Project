@@ -30,6 +30,7 @@ Table users {
   updatedAt DateTime [not null]
   deletedAt DateTime
   Event calendar_events [not null]
+  JobVacancy job_vacancies [not null]
 }
 
 Table email_templates {
@@ -62,6 +63,49 @@ Table calendar_events {
   updatedAt DateTime [not null]
 }
 
+Table job_vacancies {
+  id String [pk]
+  title String [not null]
+  body String [not null]
+  status Status [not null, default: 'ACTIVE']
+  employmentTypes String[] [not null]
+  experience String [not null]
+  role String [not null]
+  skills String[] [not null]
+  workSchedule String[] [not null]
+  location String[] [not null]
+  expiryDate DateTime [not null]
+  salary Json [not null]
+  salaryNegotiable Boolean [not null]
+  benefits String[] [not null]
+  isPublished Boolean [not null, default: false]
+  JobApplication job_applications [not null]
+  userId String [not null]
+  createdBy users [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table job_applications {
+  id String [pk]
+  name String
+  email String
+  phone String
+  skills String[] [not null]
+  profile String
+  summary String
+  yearsOfExperience String
+  jobVacancyId String [not null]
+  resume String
+  matchPercentage Int
+  shortInfo String
+  resumeLink String
+  summaryLink String
+  jobVacancy job_vacancies [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
 Enum Status {
   ACTIVE
   INACTIVE
@@ -80,3 +124,7 @@ Ref: email_templates.userId > users.id
 Ref: calendar_events.emailTemplateId > email_templates.id [delete: Cascade]
 
 Ref: calendar_events.userId > users.id [delete: Set Null]
+
+Ref: job_vacancies.userId > users.id [delete: Set Null]
+
+Ref: job_applications.jobVacancyId > job_vacancies.id [delete: Cascade]

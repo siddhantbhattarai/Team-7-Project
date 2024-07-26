@@ -16,11 +16,12 @@ import { useResponsive } from 'src/hooks/use-responsive';
 // components
 import Iconify from 'src/components/iconify';
 import Editor from 'src/components/editor';
-import { useAddMailTemplate } from 'src/api/mailTemplate';
+import { useAddMailTemplate, useSendMailTemplate } from 'src/api/mailTemplate';
 import { getCurrentUser } from 'src/utils/SessionManager';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { Box, Tooltip } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -34,10 +35,13 @@ type Props = {
 
 export default function MailCompose({ onCloseCompose }: Props) {
   const smUp = useResponsive('up', 'sm');
-  const addTemplate = useAddMailTemplate();
+  const addTemplate = useAddMailTemplate(onCloseCompose);
+  const sendEmail = useSendMailTemplate(onCloseCompose);
   const user = getCurrentUser();
 
   const [message, setMessage] = useState('');
+  const [to, setTo] = useState('');
+  const [isSendNow, setIsSendNow] = useState(false);
   const [subject, setSubject] = useState('');
   const NewJobSchema = Yup.object().shape({
     to: Yup.string().required('To is required'),
@@ -70,13 +74,22 @@ export default function MailCompose({ onCloseCompose }: Props) {
     if (subject === '' || message === '') {
       return;
     }
-    addTemplate.mutate({
+    const details: any = {
       subject,
       body: message,
       createdBy: user?.id,
       status: 'ACTIVE',
-    });
-    onCloseCompose();
+    };
+    if (isSendNow) {
+      if (to === '') {
+        return;
+      }
+
+      details.to = to;
+      sendEmail.mutate(details);
+    } else {
+      addTemplate.mutate(details);
+    }
   };
 
   return (
@@ -116,6 +129,15 @@ export default function MailCompose({ onCloseCompose }: Props) {
             New email
           </Typography>
 
+          <Tooltip title={'send now'}>
+            <IconButton
+              onClick={() => {
+                setIsSendNow(!isSendNow);
+              }}
+            >
+              <Iconify icon="iconamoon:send-fill" />
+            </IconButton>
+          </Tooltip>
           <IconButton onClick={fullScreen.onToggle}>
             <Iconify icon={fullScreen ? 'eva:collapse-fill' : 'eva:expand-fill'} />
           </IconButton>
@@ -125,20 +147,25 @@ export default function MailCompose({ onCloseCompose }: Props) {
           </IconButton>
         </Stack>
 
-        {/* <InputBase
-          placeholder="To"
-          endAdornment={
-            <Stack direction="row" spacing={0.5} sx={{ typography: 'subtitle2' }}>
-              <Box sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>Cc</Box>
-              <Box sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>Bcc</Box>
-            </Stack>
-          }
-          sx={{
-            px: 2,
-            height: 48,
-            borderBottom: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`,
-          }}
-        /> */}
+        {isSendNow && (
+          <InputBase
+            placeholder="To"
+            onChange={(e) => setTo(e.target.value)}
+            endAdornment={
+              <Stack direction="row" spacing={0.5} sx={{ typography: 'subtitle2' }}>
+                <Box sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>Cc</Box>
+                <Box sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
+                  Bcc
+                </Box>
+              </Stack>
+            }
+            sx={{
+              px: 2,
+              height: 48,
+              borderBottom: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`,
+            }}
+          />
+        )}
         <InputBase
           placeholder="Subject"
           onChange={(e) => setSubject(e.target.value)}
@@ -181,17 +208,7 @@ export default function MailCompose({ onCloseCompose }: Props) {
               </IconButton>
             </Stack>
 
-            <Stack direction="row" alignItems="center" gap={2}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSave}
-                type="submit"
-                endIcon={<Iconify icon="iconamoon:save-fill" />}
-              >
-                Save
-              </Button>
-
+            {isSendNow ? (
               <Button
                 variant="contained"
                 color="secondary"
@@ -201,7 +218,17 @@ export default function MailCompose({ onCloseCompose }: Props) {
               >
                 Send now
               </Button>
-            </Stack>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSave}
+                type="submit"
+                endIcon={<Iconify icon="iconamoon:save-fill" />}
+              >
+                Save
+              </Button>
+            )}
           </Stack>
         </Stack>
       </Paper>

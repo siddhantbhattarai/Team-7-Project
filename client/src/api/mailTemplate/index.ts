@@ -7,8 +7,34 @@ import { useRouter } from 'src/routes/hook';
 import { IMailTemplate } from 'src/types/mail';
 
 // ----------------------------------------------------------------------
+export function useSendMailTemplate(onCloseCompose: VoidFunction) {
+  const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
 
-export function useAddMailTemplate() {
+  return useMutation({
+    mutationKey: ['addemailtemplate'],
+    mutationFn: async (email: Partial<IMailTemplate>) => {
+      const res = api.post('/email/send', email);
+      return res;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ['emailtemplates'],
+        refetchType: 'active',
+      });
+      console.log(data);
+      enqueueSnackbar(data.data.message, { variant: 'success' });
+      onCloseCompose();
+      router.push(paths.dashboard.mail);
+    },
+    onError: () => {
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
+    },
+  });
+}
+
+export function useAddMailTemplate(onCloseCompose: VoidFunction) {
   const queryClient = useQueryClient();
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
@@ -25,7 +51,8 @@ export function useAddMailTemplate() {
         refetchType: 'active',
       });
       enqueueSnackbar('Email template Created Successfully!', { variant: 'success' });
-      router.push(paths.dashboard.mail);
+      onCloseCompose();
+      // router.push(paths.dashboard.mail);
     },
     onError: () => {
       enqueueSnackbar('Something went wrong', { variant: 'error' });
@@ -50,7 +77,7 @@ export function useDeleteMailTemplates() {
         refetchType: 'active',
       });
       enqueueSnackbar('Email template delete Successfully!', { variant: 'success' });
-      router.push(paths.dashboard.mail);
+      // router.push(paths.dashboard.mail);
     },
     onError: (error: any) => {
       enqueueSnackbar(error.response.data.message || 'Something went wrong', { variant: 'error' });

@@ -120,16 +120,16 @@ export default function JobDetailsContent({ job }: Props) {
       sx={{ p: 3, borderRadius: 2, mt: 3 }}
     >
       <Avatar
-        alt={job.company.name}
-        src={job.company.logo}
+        alt={'ISMT'}
+        src={'https://api-dev-minimal-v510.vercel.app/assets/images/company/company_1.png'}
         variant="rounded"
         sx={{ width: 64, height: 64 }}
       />
 
       <Stack spacing={1}>
-        <Typography variant="subtitle1">{job.company.name}</Typography>
-        <Typography variant="body2">{job.company.fullAddress}</Typography>
-        <Typography variant="body2">{job.company.phoneNumber}</Typography>
+        <Typography variant="subtitle1">{'ISMT'}</Typography>
+        <Typography variant="body2">{'Kathmandu'}</Typography>
+        <Typography variant="body2">{'9801234556'}</Typography>
       </Stack>
     </Stack>
   );

@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <title>{{subject}}</title>
+    <style>
+      body, h1, h2, h3, h4, h5, h6, p, ul, ol, li { margin: 0; padding: 0; } /* General styles */
+      body { font-family: Arial, sans-serif; line-height: 1.5; color: #333; background-color:
+      #f9f9f9; } /* Headings */ h1, h2, h3, h4, h5, h6 { margin: 0 0 20px; padding: 0; font-weight:
+      normal; } h1 { font-size: 24px; color: #333; } h2 { font-size: 20px; color: #444; } h3 {
+      font-size: 18px; color: #555; } h4 { font-size: 16px; color: #666; } h5 { font-size: 14px;
+      color: #777; } h6 { font-size: 12px; color: #888; } /* Paragraphs */ p { margin: 0 0 16px; }
+      /* Links */ a { color: #0066cc; text-decoration: none; } a:hover { text-decoration: underline;
+      } /* Lists */ ul, ol { margin: 0 0 16px 20px; } li { margin: 0 0 8px; } /* Tables */ table {
+      border-collapse: collapse; width: 100%; } th, td { border: 1px solid #ddd; padding: 8px;
+      text-align: left; } th { background-color: #f4f4f4; } /* Images */ img { max-width: 100%;
+      height: auto; } /* Blockquotes */ blockquote { border-left: 4px solid #eee; margin: 0 0 16px;
+      padding: 0 16px; color: #666; }
+    </style>
+  </head>
+  <body style='font-family:Poppins,Helvetica,Arial,sans-serif;'>
+    <div>
+      {{{body}}}
+    </div>
+
+    <p>Sent by: {{author}}</p>
+  </body>
+</html>

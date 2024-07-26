@@ -18,9 +18,9 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 import { PaginateQueryDto, StudentQueryDto } from './dto/userQuery.dto';
 
+@Controller('users')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RoleGuard)
-@Controller('users')
 @ApiTags('Users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

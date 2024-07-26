@@ -31,13 +31,56 @@ export type IJobSalary = {
   price: number;
   negotiable: boolean;
 };
+type Status = 'ACTIVE' | 'INACTIVE';
+export interface IJobVacancy {
+  id: string;
+  title: string;
+  body: string;
+  status: Status;
+  employmentTypes: string[];
+  experience: string;
+  role: string;
+  skills: string[];
+  workSchedule: string[];
+  location: string[];
+  expiryDate: Date;
+  salary: {
+    type: string;
+    price: number;
+    negotiable: boolean;
+  };
+  salaryNegotiable: boolean;
+  benefits: string[];
+  isPublished: boolean;
+  jobApplications: IJobApplication[];
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  _count: {
+    JobApplication: number;
+  };
+}
+
+export interface IJobApplication {
+  id: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  skills: string[];
+  profile?: string;
+  summary?: string;
+  yearsOfExperience?: string;
+  jobVacancyId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export type IJobItem = {
   id: string;
   role: string;
   title: string;
   content: string;
-  publish: string;
+  publish?: string;
   createdAt: Date;
   skills: string[];
   expiredDate: Date;
@@ -46,8 +89,8 @@ export type IJobItem = {
   salary: IJobSalary;
   benefits: string[];
   locations: string[];
-  company: IJobCompany;
+  company?: IJobCompany;
   employmentTypes: string[];
   workingSchedule: string[];
-  candidates: IJobCandidate[];
+  candidates?: IJobCandidate[];
 };

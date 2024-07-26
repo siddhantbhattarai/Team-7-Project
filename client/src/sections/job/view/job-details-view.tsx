@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -17,6 +17,8 @@ import { useSettingsContext } from 'src/components/settings';
 import JobDetailsToolbar from '../job-details-toolbar';
 import JobDetailsContent from '../job-details-content';
 import JobDetailsCandidates from '../job-details-candidates';
+import { useFetchJobId } from 'src/api/jobs';
+import { LoadingScreen } from 'src/components/loading-screen';
 
 // ----------------------------------------------------------------------
 
@@ -27,19 +29,49 @@ export default function JobDetailsView() {
 
   const { id } = params;
 
-  const currentJob = _jobs.filter((job) => job.id === id)[0];
-
-  const [publish, setPublish] = useState(currentJob?.publish);
-
+  const [publish, setPublish] = useState('draft');
+  const { data: job, isLoading } = useFetchJobId(id as string);
   const [currentTab, setCurrentTab] = useState('content');
 
   const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
+    if (newValue === 'candidates') {
+      if (currentJob.candidates === 0) {
+        return;
+      }
+    }
     setCurrentTab(newValue);
   }, []);
 
   const handleChangePublish = useCallback((newValue: string) => {
     setPublish(newValue);
   }, []);
+
+  useEffect(() => {
+    if (job && currentJob) {
+      setPublish(currentJob.publish ? 'published' : 'draft');
+    }
+  }, [job]);
+
+  if (isLoading) return <LoadingScreen />;
+
+  const currentJob = {
+    id: job.id,
+    title: job.title,
+    benefits: job.benefits,
+    employmentTypes: job.employmentTypes,
+    experience: job.experience,
+    workingSchedule: job.workSchedule,
+    expiredDate: job.expiryDate,
+    role: job.role,
+    locations: location,
+    salary: job.salary,
+    skills: job.skills,
+    createdAt: job.createdAt,
+    content: job.body,
+    totalViews: job._count.JobApplication,
+    candidates: job._count.JobApplication,
+    publish: job.isPublished,
+  };
 
   const renderTabs = (
     <Tabs
@@ -57,7 +89,7 @@ export default function JobDetailsView() {
           label={tab.label}
           icon={
             tab.value === 'candidates' ? (
-              <Label variant="filled">{currentJob?.candidates.length}</Label>
+              <Label variant="filled">{currentJob?.totalViews}</Label>
             ) : (
               ''
             )

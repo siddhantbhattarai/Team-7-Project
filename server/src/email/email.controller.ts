@@ -13,6 +13,24 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 
+  @Post('send')
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Create new email template' })
+  @ApiResponse({
+    status: 200,
+    description: 'The found record',
+    type: [CreateEmailTemplateDto],
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  createAndSend(
+    @Body()
+    createEmailDto: CreateEmailTemplateDto & {
+      to: string;
+    },
+  ) {
+    return this.emailService.sendAndCreateTemplate(createEmailDto);
+  }
+
   @Post()
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Create new email template' })

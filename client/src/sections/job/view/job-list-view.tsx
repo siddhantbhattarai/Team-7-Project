@@ -49,9 +49,8 @@ const defaultFilters: IJobFilters = {
 
 // ----------------------------------------------------------------------
 
-export default function JobListView() {
+export default function JobListView({ jobs }: { jobs: IJobItem[] | undefined }) {
   const settings = useSettingsContext();
-
   const openFilters = useBoolean();
 
   const [sortBy, setSortBy] = useState('latest');
@@ -64,7 +63,7 @@ export default function JobListView() {
   const [filters, setFilters] = useState(defaultFilters);
 
   const dataFiltered = applyFilter({
-    inputData: _jobs,
+    inputData: jobs || [],
     filters,
     sortBy,
   });

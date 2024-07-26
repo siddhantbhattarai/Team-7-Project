@@ -9,6 +9,7 @@ import { useRouter } from 'src/routes/hook';
 import { IJobItem } from 'src/types/job';
 //
 import JobItem from './job-item';
+import { useRemoveJob } from 'src/api/jobs';
 
 // ----------------------------------------------------------------------
 
@@ -18,6 +19,7 @@ type Props = {
 
 export default function JobList({ jobs }: Props) {
   const router = useRouter();
+  const deleteJob = useRemoveJob();
 
   const handleView = useCallback(
     (id: string) => {
@@ -34,7 +36,7 @@ export default function JobList({ jobs }: Props) {
   );
 
   const handleDelete = useCallback((id: string) => {
-    console.info('DELETE', id);
+    deleteJob.mutate(id);
   }, []);
 
   return (

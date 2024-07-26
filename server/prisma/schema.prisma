@@ -60,6 +60,7 @@ model User {
   updatedAt      DateTime         @updatedAt
   deletedAt      DateTime?
   Event          CalendarEvents[]
+  JobVacancy     JobVacancy[]
 
   @@map("users")
 }
@@ -99,4 +100,53 @@ model CalendarEvents {
   updatedAt DateTime @updatedAt
 
   @@map("calendar_events")
+}
+
+model JobVacancy {
+  id               String           @id @default(uuid())
+  title            String
+  body             String
+  status           Status           @default(ACTIVE)
+  employmentTypes  String[]
+  experience       String
+  role             String
+  skills           String[]
+  workSchedule     String[]
+  location         String[]
+  expiryDate       DateTime
+  salary           Json
+  salaryNegotiable Boolean
+  benefits         String[]
+  isPublished      Boolean          @default(false)
+  JobApplication   JobApplication[]
+
+  userId    String
+  createdBy User   @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("job_vacancies")
+}
+
+model JobApplication {
+  id                String     @id @default(uuid())
+  name              String?
+  email             String?
+  phone             String?
+  skills            String[]
+  profile           String?
+  summary           String?
+  yearsOfExperience String?
+  jobVacancyId      String
+  resume            String?
+  matchPercentage   Int?
+  shortInfo         String?
+  resumeLink        String?
+  summaryLink       String?
+  jobVacancy        JobVacancy @relation(fields: [jobVacancyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  @@map("job_applications")
 }

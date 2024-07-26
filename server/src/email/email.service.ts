@@ -7,11 +7,19 @@ import {
 import { CreateEmailTemplateDto, UpdateEmailTemplateDto } from './dto/create-email.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
+import { AuthService } from 'src/auth/auth.service';
+import { MailService } from 'src/mailer/mailer.service';
 
 @Injectable()
 export class EmailService {
   private readonly _logger = new Logger(EmailService.name);
-  constructor(private readonly prisma: PrismaService, private readonly userService: UsersService) {}
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userService: UsersService,
+    private mailService: MailService,
+  ) {}
+
   async createTemplate(data: CreateEmailTemplateDto) {
     const { createdBy, ...rest } = data;
 
@@ -32,10 +40,41 @@ export class EmailService {
             },
           },
         },
+        include: {
+          createdBy: true,
+        },
       });
       return template;
     } catch (error) {
       this._logger.error(`Error in creating email template: ${error.message}`);
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async sendAndCreateTemplate(
+    data: CreateEmailTemplateDto & {
+      to: string;
+    },
+  ) {
+    const { to, ...rest } = data;
+    try {
+      this._logger.log(`Sending email to: ${to}`);
+      const result = await this.createTemplate(rest);
+
+      // Add email in queue to send email
+      this.mailService.sendEmailNow({
+        email: to,
+        subject: rest.subject,
+        body: rest.body,
+        author: result.createdBy.name,
+      });
+
+      return {
+        message: 'Email sent successfully',
+        result,
+      };
+    } catch (error) {
+      this._logger.error(`Error in sending email: ${error.message}`);
       throw new InternalServerErrorException(error.message);
     }
   }

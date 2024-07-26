@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
 // @mui
@@ -46,6 +46,9 @@ import FormProvider, {
 } from 'src/components/hook-form';
 // types
 import { IJobItem } from 'src/types/job';
+import exp from 'constants';
+import { useAddJob, useUpdateJob } from 'src/api/jobs';
+import { getCurrentUser } from 'src/utils/SessionManager';
 
 // ----------------------------------------------------------------------
 
@@ -54,11 +57,10 @@ type Props = {
 };
 
 export default function JobNewEditForm({ currentJob }: Props) {
-  const router = useRouter();
+  const [isPublished, setIsPublished] = useState(true);
 
   const mdUp = useResponsive('up', 'md');
-
-  const { enqueueSnackbar } = useSnackbar();
+  const user = getCurrentUser();
 
   const NewJobSchema = Yup.object().shape({
     title: Yup.string().required('Title is required'),
@@ -68,7 +70,6 @@ export default function JobNewEditForm({ currentJob }: Props) {
     skills: Yup.array().min(1, 'Choose at least one option'),
     workingSchedule: Yup.array().min(1, 'Choose at least one option'),
     benefits: Yup.array().min(1, 'Choose at least one option'),
-    locations: Yup.array().min(1, 'Choose at least one option'),
     expiredDate: Yup.mixed<any>().nullable().required('Expired date is required'),
     salary: Yup.object().shape({
       type: Yup.string(),
@@ -87,7 +88,6 @@ export default function JobNewEditForm({ currentJob }: Props) {
       role: currentJob?.role || _roles[1],
       skills: currentJob?.skills || [],
       workingSchedule: currentJob?.workingSchedule || [],
-      locations: currentJob?.locations || [],
       benefits: currentJob?.benefits || [],
       expiredDate: currentJob?.expiredDate || null,
       salary: currentJob?.salary || {
@@ -111,6 +111,9 @@ export default function JobNewEditForm({ currentJob }: Props) {
     formState: { isSubmitting },
   } = methods;
 
+  const createJob = useAddJob(reset);
+  const updateJob = useUpdateJob(reset);
+
   useEffect(() => {
     if (currentJob) {
       reset(defaultValues);
@@ -119,11 +122,27 @@ export default function JobNewEditForm({ currentJob }: Props) {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      enqueueSnackbar(currentJob ? 'Update success!' : 'Create success!');
-      router.push(paths.dashboard.job.root);
-      console.info('DATA', data);
+      const details = {
+        title: data.title,
+        body: data.content,
+        employmentTypes: data.employmentTypes,
+        experience: data.experience,
+        role: data.role,
+        skills: data.skills,
+        workSchedule: data.workingSchedule,
+        expiryDate: data.expiredDate.toISOString(),
+        salary: data.salary,
+        salaryNegotiable: data.salary.negotiable,
+        benefits: data.benefits,
+        isPublished,
+        userId: user.id,
+      };
+      // enqueueSnackbar(currentJob ? 'Update success!' : 'Create success!');
+      if (currentJob) {
+        updateJob.mutate({ id: currentJob.id, job: details });
+      } else {
+        createJob.mutate(details);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -269,51 +288,6 @@ export default function JobNewEditForm({ currentJob }: Props) {
             </Stack>
 
             <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Locations</Typography>
-              <RHFAutocomplete
-                name="locations"
-                placeholder="+ Locations"
-                multiple
-                disableCloseOnSelect
-                options={countries.map((option) => option.label)}
-                getOptionLabel={(option) => option}
-                renderOption={(props, option) => {
-                  const { code, label, phone } = countries.filter(
-                    (country) => country.label === option
-                  )[0];
-
-                  if (!label) {
-                    return null;
-                  }
-
-                  return (
-                    <li {...props} key={label}>
-                      <Iconify
-                        key={label}
-                        icon={`circle-flags:${code.toLowerCase()}`}
-                        width={28}
-                        sx={{ mr: 1 }}
-                      />
-                      {label} ({code}) +{phone}
-                    </li>
-                  );
-                }}
-                renderTags={(selected, getTagProps) =>
-                  selected.map((option, index) => (
-                    <Chip
-                      {...getTagProps({ index })}
-                      key={option}
-                      label={option}
-                      size="small"
-                      color="info"
-                      variant="soft"
-                    />
-                  ))
-                }
-              />
-            </Stack>
-
-            <Stack spacing={1.5}>
               <Typography variant="subtitle2">Expired</Typography>
               <Controller
                 name="expiredDate"
@@ -413,7 +387,12 @@ export default function JobNewEditForm({ currentJob }: Props) {
       {mdUp && <Grid md={4} />}
       <Grid xs={12} md={8} sx={{ display: 'flex', alignItems: 'center' }}>
         <FormControlLabel
-          control={<Switch defaultChecked />}
+          control={
+            <Switch
+              onChange={(e) => setIsPublished(e.target.checked)}
+              defaultChecked={isPublished}
+            />
+          }
           label="Publish"
           sx={{ flexGrow: 1, pl: 3 }}
         />

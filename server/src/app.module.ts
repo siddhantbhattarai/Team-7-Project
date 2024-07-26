@@ -7,6 +7,8 @@ import { MailModule } from './mailer/mailer.module';
 import { UsersModule } from './users/users.module';
 import { EmailModule } from './email/email.module';
 import { CalendarEventModule } from './calendar-event/calendar-event.module';
+import { JobsModule } from './jobs/jobs.module';
+import { JobApplicationModule } from './job-application/job-application.module';
 
 @Module({
   imports: [
@@ -25,8 +27,10 @@ import { CalendarEventModule } from './calendar-event/calendar-event.module';
     PrismaModule,
     MailModule,
     UsersModule,
-    EmailModule,
     CalendarEventModule,
+    JobsModule,
+    EmailModule,
+    JobApplicationModule,
   ],
 })
 export class AppModule {}
