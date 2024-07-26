@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Boss Adventure ',
+  title: 'ISMT Hub',
 };
 
 export default function HomePage() {

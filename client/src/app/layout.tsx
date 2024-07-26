@@ -44,8 +44,7 @@ import TanStackProvider from '../auth/context/tanstack';
 
 export const metadata = {
   title: 'ISMT Hub',
-  description:
-    'Boss Adventure Nepal is Leading Trekking Agency from Nepal, Contact us for Everest and Annapurna Base Camp Trekking, Tibet, Bhutan and India Tour.',
+  description: 'ISMT HUB',
   keywords: 'trekking, tour, nepal, everest, annapurna',
   themeColor: '#000000',
   manifest: '/manifest.json',
