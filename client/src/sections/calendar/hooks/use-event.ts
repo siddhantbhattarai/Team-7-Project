@@ -14,7 +14,6 @@ export default function useEvent(
   openForm: boolean
 ) {
   const currentEvent = events.find((event) => event.id === selectEventId);
-  console.log('🚀 ~ current event inside useEvent:', currentEvent);
 
   const defaultValues = {
     id: currentEvent?.id || '',
@@ -24,7 +23,7 @@ export default function useEvent(
     color: currentEvent?.color || CALENDAR_COLOR_OPTIONS[0],
     template: currentEvent?.emailTemplate?.title || '',
     to: currentEvent?.to || null,
-    courses: currentEvent?.condition?.course || [],
+    courses: currentEvent?.condition?.course || '',
     sections: currentEvent?.condition?.sections || [],
     tags: currentEvent?.condition?.tags || [],
     batches: currentEvent?.condition?.batches || [],

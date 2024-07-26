@@ -43,8 +43,8 @@ export default function JobEditView() {
     skills: job.skills,
     createdAt: job.createdAt,
     content: job.body,
-    totalViews: job._count.JobApplication,
-    candidates: job._count.JobApplication,
+    totalViews: job.JobApplication.length || 0,
+    candidates: job.JobApplication,
     publish: job.isPublished ? 'published' : 'draft',
     company: {
       fullAddress: 'kathmandu',

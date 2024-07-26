@@ -21,6 +21,7 @@ import Iconify from 'src/components/iconify';
 import { RouterLink } from 'src/routes/components';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
+import { useSnackbar } from 'notistack';
 // ----------------------------------------------------------------------
 
 type Props = {
@@ -33,6 +34,18 @@ type Props = {
 
 export default function JobItem({ job, onView, onEdit, onDelete, outSide = false }: Props) {
   const popover = usePopover();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const copyToClipboard = async (id: string) => {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    try {
+      await navigator.clipboard.writeText(`${baseUrl}/job-vacancy/${id}`);
+      enqueueSnackbar('Link copied to clipboard!', { variant: 'success' });
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+      enqueueSnackbar('Failed to copy link!', { variant: 'error' });
+    }
+  };
 
   const { id, title, company, createdAt, candidates, experience, employmentTypes, salary, role } =
     job;
@@ -146,6 +159,7 @@ export default function JobItem({ job, onView, onEdit, onDelete, outSide = false
               <Iconify icon="solar:eye-bold" />
               View
             </MenuItem>
+
             <MenuItem
               onClick={() => {
                 popover.onClose();
@@ -156,6 +170,14 @@ export default function JobItem({ job, onView, onEdit, onDelete, outSide = false
               Edit
             </MenuItem>
 
+            <MenuItem
+              onClick={() => {
+                copyToClipboard(id);
+              }}
+            >
+              <Iconify icon="solar:copy-bold" />
+              Copy link
+            </MenuItem>
             <MenuItem
               onClick={() => {
                 popover.onClose();

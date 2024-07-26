@@ -14,7 +14,7 @@ export default function JobListPage() {
   if (isLoading) return <LoadingScreen />;
 
   let filteredJobs = jobs?.map((job) => {
-    const { id, title, role, location, salary, skills, status, createdAt } = job;
+    const { id, title, role, location, salary, skills, status, createdAt, jobApplications } = job;
 
     return {
       id,
@@ -31,7 +31,7 @@ export default function JobListPage() {
       status,
       createdAt,
       content: job.body,
-      totalViews: job._count.JobApplication,
+      totalViews: jobApplications?.length || 0,
     } as IJobItem;
   });
 

@@ -15,7 +15,6 @@ import { useSettingsContext } from 'src/components/settings';
 import { useFetchJobId } from 'src/api/jobs';
 import { LoadingScreen } from 'src/components/loading-screen';
 import JobDetailsContent from 'src/sections/job/job-details-content';
-import JobDetailsCandidates from 'src/sections/job/job-details-candidates';
 import { Box, Button, Dialog, Stack, Typography, useTheme } from '@mui/material';
 import JobApplyForm from 'src/sections/job/job-form';
 
@@ -78,8 +77,8 @@ export default function JobDetailsView() {
     skills: job.skills,
     createdAt: job.createdAt,
     content: job.body,
-    totalViews: job._count.JobApplication,
-    candidates: job._count.JobApplication,
+    totalViews: job.JobApplication.length || 0,
+    candidates: job.JobApplication,
     publish: job.isPublished,
   };
 

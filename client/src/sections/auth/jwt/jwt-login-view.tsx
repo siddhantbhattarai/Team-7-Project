@@ -69,13 +69,12 @@ export default function JwtLoginView() {
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5 }}>
-      <Typography variant="h4">ISMT Hub</Typography>
+      <Typography variant="h4">Welcome to ISMT Hub</Typography>
 
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2">
           ISMT Hub is a digital platform designed to foster a closer and more efficient connection
-          between the administration and students of the International School of Management and
-          Technology (ISMT)
+          between the administration and students.{' '}
         </Typography>
 
         {/* <Link component={RouterLink} href={paths.auth.login} variant="subtitle2">
@@ -90,7 +89,7 @@ export default function JwtLoginView() {
       {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
       <RHFTextField name="email" label="Email address" />
-      <RHFTextField name="password" label="Password" />
+      <RHFTextField type="password" name="password" label="Password" />
 
       <LoadingButton
         fullWidth

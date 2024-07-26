@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import * as Yup from 'yup';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -12,28 +11,16 @@ import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import DialogActions from '@mui/material/DialogActions';
 // utils
-import uuidv4 from 'src/utils/uuidv4';
-import { fTimestamp } from 'src/utils/format-time';
-// api
 import {
-  deleteEvent,
   useAddEventCalendar,
   useDeleteEventCalendar,
   useUpdateEventCalendar,
 } from 'src/api/calendar';
 // components
 import Iconify from 'src/components/iconify';
-import { useSnackbar } from 'src/components/snackbar';
 import { ColorPicker } from 'src/components/color-utils';
-import FormProvider, {
-  RHFTextField,
-  RHFSwitch,
-  RHFSelect,
-  RHFAutocomplete,
-} from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFSelect, RHFAutocomplete } from 'src/components/hook-form';
 // types
-import { ICalendarEvent, ICalendarDate } from 'src/types/calendar';
-import { USER_GENDER_OPTIONS } from 'src/_mock/_user';
 import { Chip, MenuItem } from '@mui/material';
 import { CALENDAR_EVENT_OPTIONS } from 'src/_mock';
 import { IMailTemplate } from 'src/types/mail';
@@ -58,8 +45,6 @@ export default function CalendarForm({
   colorOptions,
   onClose,
 }: Props) {
-  console.log('currentEvent is', currentEvent);
-
   const EventSchema = Yup.object().shape({
     title: Yup.string().max(255).required('Title is required'),
     description: Yup.string().max(5000, 'Description must be at most 5000 characters'),
@@ -83,9 +68,11 @@ export default function CalendarForm({
     reset,
     watch,
     control,
+    getFieldState,
     handleSubmit,
     formState: { isSubmitting },
   } = methods;
+  console.log('🚀 ~ getFieldState:', getFieldState('template'));
 
   const addEvent = useAddEventCalendar(onClose, reset);
   const deleteEvent = useDeleteEventCalendar(onClose, reset);

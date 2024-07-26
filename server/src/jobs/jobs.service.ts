@@ -141,9 +141,14 @@ export class JobsService {
       const job = this.prismaService.jobVacancy.findUnique({
         where: { id },
         include: {
-          _count: {
-            select: {
-              JobApplication: true,
+          JobApplication: {
+            where: {
+              NOT: {
+                matchPercentage: null,
+              },
+            },
+            orderBy: {
+              matchPercentage: 'desc',
             },
           },
         },

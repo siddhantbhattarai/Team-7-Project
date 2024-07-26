@@ -11,6 +11,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { IJobCandidate } from 'src/types/job';
 // components
 import Iconify from 'src/components/iconify';
+import { Chip, Typography } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -39,7 +40,7 @@ export default function JobDetailsCandidates({ candidates }: Props) {
           <Stack spacing={2}>
             <ListItemText
               primary={candidate.name}
-              secondary={candidate.role}
+              secondary={candidate.email}
               secondaryTypographyProps={{
                 mt: 0.5,
                 component: 'span',
@@ -47,7 +48,18 @@ export default function JobDetailsCandidates({ candidates }: Props) {
                 color: 'text.disabled',
               }}
             />
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Percentage: {candidate.matchPercentage}%
+            </Typography>
 
+            <Stack spacing={2}>
+              <Typography variant="body2">Skills</Typography>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                {candidate.skills.slice(0, 2).map((skill: string) => (
+                  <Chip key={skill} label={skill} variant="soft" />
+                ))}
+              </Stack>
+            </Stack>
             <Stack spacing={1} direction="row">
               <IconButton
                 size="small"

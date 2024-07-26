@@ -32,10 +32,11 @@ export default function JobDetailsView() {
   const [publish, setPublish] = useState('draft');
   const { data: job, isLoading } = useFetchJobId(id as string);
   const [currentTab, setCurrentTab] = useState('content');
+  let currentJob: any = null;
 
   const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
     if (newValue === 'candidates') {
-      if (currentJob.candidates === 0) {
+      if (currentJob && currentJob?.candidates === 0) {
         return;
       }
     }
@@ -47,14 +48,16 @@ export default function JobDetailsView() {
   }, []);
 
   useEffect(() => {
-    if (job && currentJob) {
+    if (job && currentJob !== null) {
       setPublish(currentJob.publish ? 'published' : 'draft');
     }
   }, [job]);
 
   if (isLoading) return <LoadingScreen />;
 
-  const currentJob = {
+  console.log('🚀 ~ JobDetailsView ~ job:', job);
+
+  currentJob = {
     id: job.id,
     title: job.title,
     benefits: job.benefits,
@@ -68,8 +71,8 @@ export default function JobDetailsView() {
     skills: job.skills,
     createdAt: job.createdAt,
     content: job.body,
-    totalViews: job._count.JobApplication,
-    candidates: job._count.JobApplication,
+    totalViews: job.JobApplication.length || 0,
+    candidates: job.JobApplication,
     publish: job.isPublished,
   };
 
