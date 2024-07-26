@@ -76,7 +76,7 @@ export default function JobListPage() {
       status,
       createdAt,
       content: job.body,
-      totalViews: job._count.JobApplication,
+      totalViews: job.JobApplication.length || 0,
     } as IJobItem;
   });
 
