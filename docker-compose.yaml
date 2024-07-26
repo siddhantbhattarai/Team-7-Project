@@ -4,8 +4,8 @@ services:
     restart: always
     environment:
       POSTGRES_USER: 'postgres'
-      POSTGRES_DB: 'my_db'
-      POSTGRES_PASSWORD: 'my.dirty.secrets'
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
 
     ports:
       - 5433:5432
@@ -24,6 +24,10 @@ services:
       - ./server:/app
     env_file:
       - './server/.env'
+    environment:
+      REDIS_HOST: cache
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
     depends_on:
@@ -44,4 +48,3 @@ services:
       - ${CLIENT_PORT}:${CLIENT_PORT}
     depends_on:
       -  server
-
