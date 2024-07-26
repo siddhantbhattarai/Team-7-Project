@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+    ports:
+      - 5433:5432
+  cache:
+    image: redis:6.2.12
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy noeviction
+
+  server:
+    build:
+      context: '.'
+      dockerfile: './server/Dockerfile'
+      target: 'dev'
+    command: './bin/start-server.sh'
+    volumes:
+      - ./server:/app
+    env_file:
+      - './server/.env'
+    environment:
+      REDIS_HOST: cache
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    depends_on:
+      - db
+      - cache
+
+  client:
+    build:
+      context: '.'
+      dockerfile: './client/Dockerfile'
+      target: 'dev'
+    #command: 'sleep 20m'
+    volumes:
+      - ./client:/app
+    env_file:
+      - './client/.env'
+    ports:
+      - ${CLIENT_PORT}:${CLIENT_PORT}
+    depends_on:
+      -  server
